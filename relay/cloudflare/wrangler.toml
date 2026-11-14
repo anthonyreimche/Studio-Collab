@@ -1,0 +1,18 @@
+# Studio Collab relay on Cloudflare: one Durable Object per room.
+# Deploy from this folder with `npx wrangler deploy` (see the README).
+name = "studio-collab-relay"
+main = "worker.mjs"
+compatibility_date = "2025-09-01"
+
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "RelayRoom"
+
+# SQLite-backed Durable Objects are the ones the free plan includes.
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["RelayRoom"]
+
+[vars]
+# Comma-separated room ids this relay serves; empty serves any room.
+ALLOWED_ROOMS = ""
