@@ -86,4 +86,8 @@ export const fakeUi: SafelightAPI["ui"] = {
   },
   alertDialog: async () => {},
   onEscape: () => () => {},
+  notify: () => ({ update() {}, close() {} }),
+  LoadingDots: ({ label }) => <span>{label}...</span>,
+  Skeleton: ({ style }) => <span style={style} />,
+  useDelayedFlag: (active) => active,
 };

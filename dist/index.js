@@ -3963,29 +3963,13 @@ function bi(e) {
 }
 //#endregion
 //#region src/app/host-ports.ts
-var xi = "1.0.0", Si = `${se}.filter`, Ci = `${se}-room`, wi = {
+var xi = "1.0.1", Si = `${se}.filter`, Ci = `${se}-room`, wi = {
 	gone: "The room's folder isn't there: its drive or share may not be connected.",
 	unwritable: "Safelight can't write into the room's folder.",
 	unknown: "Safelight doesn't know the room's folder any more. Choose it again."
 };
-function Ti(e) {
-	let t = e.sockets;
-	return t ? {
-		requestAccess: (e) => t.requestAccess(e),
-		status: (e) => t.status(e)
-	} : null;
-}
-function Ei(e) {
-	let t = e.secrets;
-	return t ? {
-		available: () => t.available(),
-		get: (e) => t.get(e),
-		set: (e, n) => t.set(e, n),
-		delete: (e) => t.delete(e)
-	} : null;
-}
-function Di(e, t) {
-	let { useCatalogStore: n, useUIStore: r, useProjectStore: i } = e.stores, a = new URLSearchParams(window.location.search).get("detached"), o = () => {
+function Ti(e, t) {
+	let { useCatalogStore: n, useUIStore: r, useProjectStore: i } = e.stores, a = () => {
 		let e = r.getState(), t = n.getState(), i = e.activeModule === "develop" || e.detached.has("develop") ? t.activePhotoId : null, a = [...t.selectedIds];
 		return {
 			module: e.activeModule,
@@ -4012,9 +3996,9 @@ function Di(e, t) {
 			removeKeyword: (e, t) => n.getState().removeKeyword(e, t),
 			getEditState: (t) => e.catalog.getEditState(t),
 			putEditState: (t) => e.catalog.putEditState(t),
-			editingPhotoId: () => o().developPhotoId
+			editingPhotoId: () => a().developPhotoId
 		},
-		whereabouts: o,
+		whereabouts: a,
 		onWhereaboutsChange: (e) => {
 			let t = r.subscribe((t, n) => {
 				(t.activeModule !== n.activeModule || t.detached !== n.detached) && e();
@@ -4048,8 +4032,16 @@ function Di(e, t) {
 			hasAccess: (t) => e.network.hasAccess(t),
 			fetch: (t, n) => e.network.fetch(t, n)
 		},
-		sockets: Ti(e),
-		secrets: Ei(e),
+		sockets: {
+			requestAccess: (t) => e.sockets.requestAccess(t),
+			status: (t) => e.sockets.status(t)
+		},
+		secrets: {
+			available: () => e.secrets.available(),
+			get: (t) => e.secrets.get(t),
+			set: (t, n) => e.secrets.set(t, n),
+			delete: (t) => e.secrets.delete(t)
+		},
 		openSocket: (e) => new WebSocket(e),
 		createPeer: typeof RTCPeerConnection == "function" ? (e) => bi(new RTCPeerConnection(e)) : null,
 		localStore: hi(),
@@ -4069,18 +4061,18 @@ function Di(e, t) {
 		}),
 		copyText: (e) => navigator.clipboard.writeText(e),
 		appVersion: xi,
-		isMainWindow: !a
+		isMainWindow: e.navigation.ownModule() === null
 	};
 }
 //#endregion
 //#region src/rt.ts
 var X, Z, Q;
-function Oi(e, t, n) {
+function Ei(e, t, n) {
 	X = e, Z = t, Q = n;
 }
 //#endregion
 //#region src/ui/Setup.tsx
-function ki() {
+function Di() {
 	let { Button: e, Field: t, SegmentedControl: n, Stack: r, TextInput: i } = Z, [a, o] = X.useState("create"), [s, c] = X.useState("folder"), [l, u] = X.useState(""), [d, f] = X.useState(null), [p, m] = X.useState(""), [h, g] = X.useState(!1), [_, v] = X.useState(!1), [y, b] = X.useState(""), x = ve(p), S = s === "folder" ? d && {
 		transport: "folder",
 		folderToken: d.token,
@@ -4164,18 +4156,18 @@ function ki() {
 }
 //#endregion
 //#region src/ui/format.ts
-var Ai = {
+var Oi = {
 	shooter: "Shooter",
 	culler: "Culler",
 	editor: "Editor",
 	exporter: "Exporter"
-}, ji = {
+}, ki = {
 	shot: "Shot",
 	culled: "Culled",
 	edited: "Edited",
 	exported: "Exported"
 };
-function Mi(e, t) {
+function Ai(e, t) {
 	if (e === null) return "not yet";
 	let n = Math.max(0, Math.round((t - e) / 1e3));
 	if (n < 5) return "just now";
@@ -4183,16 +4175,16 @@ function Mi(e, t) {
 	let r = Math.round(n / 60);
 	return r < 90 ? `${r} min ago` : `${Math.round(r / 60)} h ago`;
 }
-function Ni(e) {
+function ji(e) {
 	let t = Math.round(e / 6e4);
 	return t < 90 ? `${t} min` : `${Math.round(t / 60)} h`;
 }
-function Pi(e) {
+function Mi(e) {
 	if (e.link === "direct") return e.rttMs === null ? "direct" : `direct, ${e.rttMs} ms`;
 	let t = e.link === "relay" ? "relay" : "via folder, slower";
 	return e.connecting ? `${t} (connecting directly…)` : t;
 }
-function Fi(e, t, n) {
+function Ni(e, t, n) {
 	return t ? "editing" : e === "library" ? n === "culler" || n === "" ? "culling" : "browsing" : e === "develop" ? "looking at" : e ? `in ${e}` : "here";
 }
 //#endregion
@@ -4202,17 +4194,17 @@ var $ = (e) => ({
 	color: e,
 	lineHeight: 1.5
 });
-function Ii() {
+function Pi() {
 	return X.useSyncExternalStore(Q.subscribe, Q.getView);
 }
-function Li(e = 5e3) {
+function Fi(e = 5e3) {
 	let [t, n] = X.useState(Date.now());
 	return X.useEffect(() => {
 		let t = setInterval(() => n(Date.now()), e);
 		return () => clearInterval(t);
 	}, [e]), t;
 }
-function Ri({ view: e }) {
+function Ii({ view: e }) {
 	let { Field: t, Row: n, Select: r, TextInput: i } = Z, [a, o] = X.useState(e.profile.name);
 	return X.useEffect(() => o(e.profile.name), [e.profile.name]), /* @__PURE__ */ X.createElement(n, {
 		gap: 8,
@@ -4240,12 +4232,12 @@ function Ri({ view: e }) {
 			label: "None"
 		}, ...y.map((e) => ({
 			value: e,
-			label: Ai[e]
+			label: Oi[e]
 		}))],
 		ariaLabel: "Your role"
 	}))));
 }
-function zi({ view: e, now: t }) {
+function Li({ view: e, now: t }) {
 	let { Badge: n, Button: r, Card: i, Row: a, Stack: o, tokens: s } = Z, c = e.room, l = e.engine;
 	if (!c) return null;
 	let u = c.transport === "folder" ? `Shared folder: ${c.folderLabel || "chosen folder"}. It keeps the record; through it, changes take seconds to minutes.` : e.relayMode === "socket" ? "Relay, live connection." : "Relay, checked every few seconds.", d = e.phase === "running" ? l?.phase === "live" ? "Connected" : l?.phase === "offline" ? "Offline" : l?.phase === "problem" ? "Problem" : "Connecting" : e.phase === "starting" ? "Starting" : e.phase === "problem" ? "Problem" : "Paused", f = e.phase === "problem" ? e.problem : l?.phase === "live" ? "" : l?.detail ?? "";
@@ -4258,27 +4250,27 @@ function zi({ view: e, now: t }) {
 	}, "Use this project")), e.phase === "no-project" && /* @__PURE__ */ X.createElement("span", { style: $(s.textSecondary) }, "Open the shoot's folder to sync."), l && l.unsent > 0 && /* @__PURE__ */ X.createElement("span", { style: $(s.textSecondary) }, l.unsent, " ", l.unsent === 1 ? "change" : "changes", " waiting to be sent"), l && l.rejected > 0 && /* @__PURE__ */ X.createElement("span", { style: $(s.labelYellow) }, l.rejected, " ", l.rejected === 1 ? "entry" : "entries", " turned away: not sealed with this room's code"), l?.held.map((e) => /* @__PURE__ */ X.createElement("span", {
 		key: e.by,
 		style: $(s.labelYellow)
-	}, e.name, "'s clock runs ", Ni(e.aheadMs), " ahead; their changes wait until it is set right.")), c.transport === "relay" && e.phase === "running" && e.relayMode === "poll" && e.socketAccess !== "unavailable" && /* @__PURE__ */ X.createElement(Vi, {
+	}, e.name, "'s clock runs ", ji(e.aheadMs), " ahead; their changes wait until it is set right.")), c.transport === "relay" && e.phase === "running" && e.relayMode === "poll" && e.socketAccess !== "unavailable" && /* @__PURE__ */ X.createElement(zi, {
 		relayUrl: c.relayUrl,
 		access: e.socketAccess
-	}), /* @__PURE__ */ X.createElement("span", { style: $(s.textMuted) }, "Last change from the team: ", Mi(Bi(e), t)), e.roomId && /* @__PURE__ */ X.createElement("span", { style: {
+	}), /* @__PURE__ */ X.createElement("span", { style: $(s.textMuted) }, "Last change from the team: ", Ai(Ri(e), t)), e.roomId && /* @__PURE__ */ X.createElement("span", { style: {
 		...$(s.textMuted),
 		fontFamily: s.fontCode,
 		userSelect: "text"
 	} }, "Room id ", e.roomId)));
 }
-function Bi(e) {
+function Ri(e) {
 	let t = (e.engine?.members ?? []).map((e) => e.lastChangeAt).filter((e) => e !== null);
 	return t.length ? Math.max(...t) : null;
 }
-function Vi({ relayUrl: e, access: t }) {
+function zi({ relayUrl: e, access: t }) {
 	let { Button: n, tokens: r } = Z;
 	return t === "after-restart" ? /* @__PURE__ */ X.createElement("span", { style: $(r.textSecondary) }, "Restart Safelight to switch to the live connection.") : /* @__PURE__ */ X.createElement(n, {
 		size: "sm",
 		onClick: () => void Q.allowLiveConnection(e)
 	}, "Use a live connection");
 }
-function Hi({ view: e, now: t }) {
+function Bi({ view: e, now: t }) {
 	let { Section: n, Stack: r, Row: i, tokens: a } = Z, o = e.engine?.members ?? [];
 	return /* @__PURE__ */ X.createElement(n, { title: "People" }, o.length === 0 ? /* @__PURE__ */ X.createElement("span", { style: $(a.textMuted) }, "Nobody else has been heard from yet.") : /* @__PURE__ */ X.createElement(r, { gap: 4 }, o.map((e) => /* @__PURE__ */ X.createElement(i, {
 		key: e.id,
@@ -4293,19 +4285,19 @@ function Hi({ view: e, now: t }) {
 	} }), /* @__PURE__ */ X.createElement("span", { style: {
 		fontSize: 11,
 		color: a.textPrimary
-	} }, e.name), e.role && /* @__PURE__ */ X.createElement("span", { style: $(a.textMuted) }, Ai[e.role]), /* @__PURE__ */ X.createElement("span", { style: {
+	} }, e.name), e.role && /* @__PURE__ */ X.createElement("span", { style: $(a.textMuted) }, Oi[e.role]), /* @__PURE__ */ X.createElement("span", { style: {
 		...$(a.textSecondary),
 		flex: 1,
 		minWidth: 0,
 		overflow: "hidden",
 		textOverflow: "ellipsis",
 		whiteSpace: "nowrap"
-	} }, e.fresh ? e.photo ? `${Fi(e.module, e.editing, e.role)} ${Q.photoNameFor(e.photo)}` : Fi(e.module, !1, e.role) : `seen ${Mi(e.seenAt, t)}`), /* @__PURE__ */ X.createElement("span", { style: {
+	} }, e.fresh ? e.photo ? `${Ni(e.module, e.editing, e.role)} ${Q.photoNameFor(e.photo)}` : Ni(e.module, !1, e.role) : `seen ${Ai(e.seenAt, t)}`), /* @__PURE__ */ X.createElement("span", { style: {
 		...$(e.link === "direct" ? a.labelGreen : a.textMuted),
 		flex: "none"
-	} }, Pi(e))))));
+	} }, Mi(e))))));
 }
-function Ui({ view: e }) {
+function Vi({ view: e }) {
 	let { Button: t, Section: n, SegmentedControl: r, Stack: i, tokens: a } = Z, o = e.here.selectedIds.length ? e.here.selectedIds : e.here.photoId ? [e.here.photoId] : [], s = e.here.photoId, c = s ? Q.photoInfo(s) : null;
 	return !s || !c ? null : /* @__PURE__ */ X.createElement(n, { title: o.length > 1 ? `${o.length} photos` : "This photo" }, /* @__PURE__ */ X.createElement(i, { gap: 6 }, /* @__PURE__ */ X.createElement(r, {
 		size: "sm",
@@ -4316,14 +4308,14 @@ function Ui({ view: e }) {
 		},
 		options: Ee.map((e) => ({
 			value: e,
-			label: ji[e]
+			label: ki[e]
 		}))
 	}), c.editedBy.length > 0 && /* @__PURE__ */ X.createElement("span", { style: $(a.labelYellow) }, "Being edited by ", c.editedBy.join(", ")), c.viewedBy.length > 0 && /* @__PURE__ */ X.createElement("span", { style: $(a.textSecondary) }, "Also open for ", c.viewedBy.join(", ")), c.waitingEdit && /* @__PURE__ */ X.createElement(i, { gap: 4 }, /* @__PURE__ */ X.createElement("span", { style: $(a.textSecondary) }, "Someone changed this photo's edit. It is applied when you leave the photo, or now:"), /* @__PURE__ */ X.createElement(t, {
 		size: "sm",
 		onClick: () => void Q.applyWaitingEdit(s)
 	}, "Apply their edit")), c.tooBig && /* @__PURE__ */ X.createElement("span", { style: $(a.textMuted) }, "Part of this edit is too big to share (over 200 KB) and stays here.")));
 }
-function Wi({ view: e }) {
+function Hi({ view: e }) {
 	let { Button: t, Row: n, Section: r, Stack: i, TextInput: a, tokens: o } = Z, [s, c] = X.useState(""), [l, u] = X.useState(null), d = e.here.selectedIds.length ? e.here.selectedIds : e.here.photoId ? [e.here.photoId] : [], f = e.here.photoId ? Q.photoInfo(e.here.photoId) : null, p = () => {
 		Q.createCollection(s) && c("");
 	};
@@ -4402,7 +4394,7 @@ function Wi({ view: e }) {
 		onClick: p
 	}, "New"))));
 }
-function Gi({ view: e }) {
+function Ui({ view: e }) {
 	let { Section: t, Select: n, Stack: r, Toggle: i } = Z;
 	return /* @__PURE__ */ X.createElement(t, { title: "Grid" }, /* @__PURE__ */ X.createElement(r, { gap: 6 }, /* @__PURE__ */ X.createElement(n, {
 		value: e.filter.stage,
@@ -4415,7 +4407,7 @@ function Gi({ view: e }) {
 			label: "Every stage"
 		}, ...Ee.map((e) => ({
 			value: e,
-			label: `Only ${ji[e].toLowerCase()}`
+			label: `Only ${ki[e].toLowerCase()}`
 		}))],
 		ariaLabel: "Show photos at stage"
 	}), /* @__PURE__ */ X.createElement(i, {
@@ -4427,7 +4419,7 @@ function Gi({ view: e }) {
 		label: "Hide photos others are editing"
 	})));
 }
-function Ki({ view: e }) {
+function Wi({ view: e }) {
 	let { Button: t, Field: n, Section: r, Stack: i, TextInput: a, Toggle: o, tokens: s } = Z, c = e.realtime.turn, [l, u] = X.useState(c?.url ?? ""), [d, f] = X.useState(c?.username ?? ""), [p, m] = X.useState(c?.credential ?? "");
 	if (!e.directAvailable) return /* @__PURE__ */ X.createElement(r, { title: "Connections" }, /* @__PURE__ */ X.createElement("span", { style: $(s.textMuted) }, "Direct connections aren't available in this window."));
 	let h = Ce(l), g = l !== (c?.url ?? "") || d !== (c?.username ?? "") || p !== (c?.credential ?? "");
@@ -4470,7 +4462,7 @@ function Ki({ view: e }) {
 		})
 	}, "Save")))));
 }
-function qi({ autoStage: e }) {
+function Gi({ autoStage: e }) {
 	let { Button: t, Row: n, Stack: r, Toggle: i } = Z, [a, o] = X.useState(!1);
 	return /* @__PURE__ */ X.createElement(r, { gap: 8 }, /* @__PURE__ */ X.createElement(i, {
 		checked: e,
@@ -4491,23 +4483,23 @@ function qi({ autoStage: e }) {
 		}).then((e) => e ? Q.leaveRoom() : void 0)
 	}, "Leave room")));
 }
-function Ji() {
-	let { Stack: e, tokens: t } = Z, n = Ii(), r = Li();
-	return n.mainWindow ? /* @__PURE__ */ X.createElement("div", { style: { padding: 10 } }, /* @__PURE__ */ X.createElement(e, { gap: 14 }, /* @__PURE__ */ X.createElement(Ri, { view: n }), n.room ? /* @__PURE__ */ X.createElement(X.Fragment, null, /* @__PURE__ */ X.createElement(zi, {
+function Ki() {
+	let { Stack: e, tokens: t } = Z, n = Pi(), r = Fi();
+	return n.mainWindow ? /* @__PURE__ */ X.createElement("div", { style: { padding: 10 } }, /* @__PURE__ */ X.createElement(e, { gap: 14 }, /* @__PURE__ */ X.createElement(Ii, { view: n }), n.room ? /* @__PURE__ */ X.createElement(X.Fragment, null, /* @__PURE__ */ X.createElement(Li, {
 		view: n,
 		now: r
-	}), n.phase === "running" && /* @__PURE__ */ X.createElement(X.Fragment, null, /* @__PURE__ */ X.createElement(Hi, {
+	}), n.phase === "running" && /* @__PURE__ */ X.createElement(X.Fragment, null, /* @__PURE__ */ X.createElement(Bi, {
 		view: n,
 		now: r
-	}), /* @__PURE__ */ X.createElement(Ui, { view: n }), /* @__PURE__ */ X.createElement(Wi, { view: n }), /* @__PURE__ */ X.createElement(Gi, { view: n }), /* @__PURE__ */ X.createElement(Ki, { view: n })), /* @__PURE__ */ X.createElement(qi, { autoStage: Q.autoStage() })) : /* @__PURE__ */ X.createElement(ki, null))) : /* @__PURE__ */ X.createElement("div", { style: {
+	}), /* @__PURE__ */ X.createElement(Vi, { view: n }), /* @__PURE__ */ X.createElement(Hi, { view: n }), /* @__PURE__ */ X.createElement(Ui, { view: n }), /* @__PURE__ */ X.createElement(Wi, { view: n })), /* @__PURE__ */ X.createElement(Gi, { autoStage: Q.autoStage() })) : /* @__PURE__ */ X.createElement(Di, null))) : /* @__PURE__ */ X.createElement("div", { style: {
 		padding: 10,
 		...$(t.textSecondary)
 	} }, "Studio Collab runs in the main window. What you change here reaches the room through it.");
 }
 //#endregion
 //#region src/ui/PresenceBar.tsx
-function Yi() {
-	let { tokens: e } = Z, t = Ii(), n = (t.engine?.members ?? []).filter((e) => e.fresh);
+function qi() {
+	let { tokens: e } = Z, t = Pi(), n = (t.engine?.members ?? []).filter((e) => e.fresh);
 	return t.phase !== "running" || n.length === 0 ? null : /* @__PURE__ */ X.createElement("div", { style: {
 		display: "flex",
 		gap: 14,
@@ -4529,17 +4521,17 @@ function Yi() {
 		height: 6,
 		borderRadius: 3,
 		background: t.editing ? e.labelYellow : e.labelGreen
-	} }), /* @__PURE__ */ X.createElement("span", { style: { color: e.textPrimary } }, t.name), t.photo && /* @__PURE__ */ X.createElement("span", null, Fi(t.module, t.editing, t.role), " ", Q.photoNameFor(t.photo)))));
+	} }), /* @__PURE__ */ X.createElement("span", { style: { color: e.textPrimary } }, t.name), t.photo && /* @__PURE__ */ X.createElement("span", null, Ni(t.module, t.editing, t.role), " ", Q.photoNameFor(t.photo)))));
 }
 //#endregion
 //#region src/index.tsx
-var Xi = `${se}.panel`, Zi = null;
-function Qi(e) {
-	let t = /* @__PURE__ */ new Set(), n = new ui(Di(e, t));
-	Zi = n, Oi(e.react, e.ui, n), e.registerPanel({
-		id: Xi,
+var Ji = `${se}.panel`, Yi = null;
+function Xi(e) {
+	let t = /* @__PURE__ */ new Set(), n = new ui(Ti(e, t));
+	Yi = n, Ei(e.react, e.ui, n), e.registerPanel({
+		id: Ji,
 		title: "Studio Collab",
-		component: Ji,
+		component: Ki,
 		defaultDock: {
 			module: "library",
 			direction: "right"
@@ -4547,7 +4539,7 @@ function Qi(e) {
 	}), e.registerSlot({
 		id: `${se}.presence`,
 		slot: "library-subbar",
-		component: Yi
+		component: qi
 	}), e.registerCatalogHooks({
 		id: `${se}.edits`,
 		onEditCommit: async ({ photo: e }) => {
@@ -4565,10 +4557,10 @@ function Qi(e) {
 		process: async (e, t, r) => (r.markExported !== !1 && n.markExported(t.id), e)
 	}), n.start();
 }
-function $i() {
-	Zi?.dispose(), Zi = null;
+function Zi() {
+	Yi?.dispose(), Yi = null;
 }
 //#endregion
-export { Xi as PANEL_ID, Qi as activate, $i as deactivate };
+export { Ji as PANEL_ID, Xi as activate, Zi as deactivate };
 
 //# sourceMappingURL=index.js.map

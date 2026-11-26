@@ -30,6 +30,6 @@ describe("manifest", () => {
     expect(manifest.permissions.userSockets).toBe(true);
     expect([...manifest.permissions.network].sort()).toEqual([...PUBLIC_NOSTR_RELAYS, ...PUBLIC_TRACKERS].sort());
     for (const origin of manifest.permissions.network) expect(origin).toMatch(/^wss:\/\/[a-z0-9.-]+(:\d+)?$/);
-    expect(manifest.minAppVersion).toBe("3.2.4");
+    expect(manifest.minAppVersion).toBe("3.2.8");
   });
 });

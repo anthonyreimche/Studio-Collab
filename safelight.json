@@ -1,7 +1,7 @@
 {
   "id": "studio-collab",
   "name": "Studio Collab",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Work on one shoot as a team: ratings, flags, colour labels, keywords, develop edits, team collections, stages and who is on which photo. Teammates connect directly, so changes arrive within a second; a shared folder your studio already syncs (Google Drive, OneDrive, Dropbox, Syncthing, a NAS) or a relay you host yourself keeps the record and catches up whoever was away. End-to-end encrypted with a room code; no server of anyone else to pay for.",
   "author": "Anthony Reimche",
   "main": "dist/index.js",
@@ -24,7 +24,7 @@
     "culling"
   ],
   "repository": "anthonyreimche/Studio-Collab",
-  "minAppVersion": "3.2.4",
+  "minAppVersion": "3.2.8",
   "permissions": {
     "network": [
       "wss://relay.damus.io",

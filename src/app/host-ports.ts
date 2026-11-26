@@ -5,9 +5,9 @@ import { EXTENSION_ID } from "../settings";
 import { indexedDbStore } from "../sync/local-store";
 import { handleFolder } from "../transport/folder-like";
 import { adaptPeer } from "../realtime/rtc-adapter";
-import type { AppPorts, SecretsPort, SocketsPort, Whereabouts } from "./ports";
+import type { AppPorts, Whereabouts } from "./ports";
 
-export const APP_VERSION = "1.0.0";
+export const APP_VERSION = "1.0.1";
 const FILTER_ID = `${EXTENSION_ID}.filter`;
 const FOLDER_PICKER_ID = `${EXTENSION_ID}-room`;
 
@@ -17,28 +17,8 @@ const PROBLEMS = {
   unknown: "Safelight doesn't know the room's folder any more. Choose it again.",
 } as const;
 
-/** api.sockets, on a Safelight that has it (3.2.5 and later). */
-function socketsOf(api: SafelightAPI): SocketsPort | null {
-  const sockets: SafelightAPI["sockets"] | undefined = api.sockets;
-  return sockets ? { requestAccess: (url) => sockets.requestAccess(url), status: (url) => sockets.status(url) } : null;
-}
-
-/** api.secrets, on a Safelight that has it (3.2.5 and later). */
-function secretsOf(api: SafelightAPI): SecretsPort | null {
-  const secrets: SafelightAPI["secrets"] | undefined = api.secrets;
-  return secrets
-    ? {
-        available: () => secrets.available(),
-        get: (key) => secrets.get(key),
-        set: (key, value) => secrets.set(key, value),
-        delete: (key) => secrets.delete(key),
-      }
-    : null;
-}
-
 export function hostPorts(api: SafelightAPI, editStored: Set<(photoId: string) => void>): AppPorts {
   const { useCatalogStore, useUIStore, useProjectStore } = api.stores;
-  const detached = new URLSearchParams(window.location.search).get("detached");
 
   const whereabouts = (): Whereabouts => {
     const ui = useUIStore.getState();
@@ -109,8 +89,13 @@ export function hostPorts(api: SafelightAPI, editStored: Set<(photoId: string) =
       hasAccess: (url) => api.network.hasAccess(url),
       fetch: (url, init) => api.network.fetch(url, init),
     },
-    sockets: socketsOf(api),
-    secrets: secretsOf(api),
+    sockets: { requestAccess: (url) => api.sockets.requestAccess(url), status: (url) => api.sockets.status(url) },
+    secrets: {
+      available: () => api.secrets.available(),
+      get: (key) => api.secrets.get(key),
+      set: (key, value) => api.secrets.set(key, value),
+      delete: (key) => api.secrets.delete(key),
+    },
     openSocket: (url) => new WebSocket(url),
     createPeer: typeof RTCPeerConnection === "function" ? (config) => adaptPeer(new RTCPeerConnection(config)) : null,
     localStore: indexedDbStore(),
@@ -132,6 +117,6 @@ export function hostPorts(api: SafelightAPI, editStored: Set<(photoId: string) =
       }),
     copyText: (text) => navigator.clipboard.writeText(text),
     appVersion: APP_VERSION,
-    isMainWindow: !detached,
+    isMainWindow: api.navigation.ownModule() === null,
   };
 }

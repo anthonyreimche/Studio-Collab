@@ -1,7 +1,7 @@
 {
   "name": "safelight-studio-collab",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Studio Collab for Safelight: team sync through a shared folder or a self-hosted relay.",
   "type": "module",
   "scripts": {
